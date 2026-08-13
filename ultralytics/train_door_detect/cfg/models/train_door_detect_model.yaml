@@ -1,0 +1,55 @@
+# Ultralytics YOLO 🚀, AGPL-3.0 license
+# Paper model: SPPSA-StarNet + CFDPN + DESD
+# Logic / topology identical to ultralytics-mgmj ours2.yaml (paper names only)
+
+# Parameters
+nc: 2 # number of classes
+scales: # model compound scaling constants
+  # [depth, width, max_channels]
+  n: [ 0.50, 0.25, 1024 ] # ~1.03M params (scale n), matches mgmj ours2 topology
+  s: [ 0.50, 0.50, 1024 ]
+  m: [ 0.50, 1.00, 512 ]
+  l: [ 1.00, 1.00, 512 ]
+  x: [ 1.00, 1.50, 512 ]
+
+# 0-P1/2
+# 1-P2/4
+# 2-P3/8
+# 3-P4/16
+# 4-P5/32
+
+# SPPSA-StarNet backbone
+backbone:
+  # [from, repeats, module, args]
+  - [ -1, 1, StarNet, [ ] ]  # 4
+  - [ -1, 1, SPPSA, [ 1024, 5 ] ]  # 5
+
+# CFDPN neck + DESD head
+head:
+  - [ -1, 1, Conv, [ 512, 1, 1 ] ]  # 6
+  - [ 3, 1, Conv, [ 512, 1, 1 ] ]  # 7
+  - [ 2, 1, Conv, [ 512, 1, 1 ] ]  # 8
+
+  - [ [ -1, -2, -3 ], 1, SAG, [ ] ]  # 9
+
+  - [ -1, 1, ChannelAlign, [ 256, 1, 1, None, 1, 1, False, 0 ] ]  # 10
+  - [ -2, 1, ChannelAlign, [ 256, 1, 1, None, 1, 1, False, 1 ] ]  # 11
+  - [ -3, 1, ChannelAlign, [ 256, 1, 1, None, 1, 1, False, 2 ] ]  # 12
+
+  - [ -1, 1, nn.Upsample, [ None, 2, "nearest" ] ] # 13
+  - [ [ 11, -1 ], 1, LightFusion, [ ] ] # 14
+  - [ -1, 2, C3k2, [ 256, False ] ] # 15
+
+  - [ -1, 1, nn.Upsample, [ None, 2, "nearest" ] ] # 16
+  - [ [ 10, -1 ], 1, LightFusion, [ ] ] # 17
+  - [ -1, 2, C3k2, [ 256, False ] ] # 18 (P3/8)
+
+  - [ -1, 1, Conv, [ 256, 3, 2 ] ]
+  - [ [ -1, 15 ], 1, LightFusion, [ ] ] # 19
+  - [ -1, 2, C3k2, [ 256, False ] ] # 20 (P4/16)
+
+  - [ -1, 1, Conv, [ 256, 3, 2 ] ] # 21
+  - [ [ -1, 12 ], 1, LightFusion, [ ] ] # 22
+  - [ -1, 2, C3k2, [ 256, True ] ] # 23 (P5/32)
+
+  - [ [ 18, 20, 23 ], 1, DESD, [ nc ] ] # DESD(P3, P4, P5)

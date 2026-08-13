@@ -1,0 +1,19 @@
+# Runtime dependencies for the paper train-door detector package
+# Base framework: Ultralytics YOLO (this repository is a research fork of ultralytics==8.3.225)
+
+# PyTorch: install the CUDA build that matches your GPU first, e.g.
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+torch>=1.8.0
+torchvision>=0.9.0
+
+numpy>=1.23.0
+opencv-python>=4.6.0
+pillow>=7.1.2
+matplotlib>=3.3.0
+pyyaml>=5.3.1
+requests>=2.23.0
+scipy>=1.4.1
+psutil
+polars
+ultralytics-thop>=2.0.18
+timm>=0.9.0
