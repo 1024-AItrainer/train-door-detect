@@ -22,6 +22,9 @@ citing our paper.
 
 ## What is included / not included
 
+See also [`DATA_AVAILABILITY.md`](DATA_AVAILABILITY.md) and [`REPRODUCE.md`](REPRODUCE.md) for the release boundary and a short reviewer checklist.
+
+
 **Included (open for review)**
 
 - Detector architecture YAML: `ultralytics/train_door_detect/cfg/models/train_door_detect_model.yaml`
